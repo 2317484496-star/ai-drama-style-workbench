@@ -345,6 +345,30 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
 .back-top.dragging{cursor:grabbing;border-color:var(--gold);color:var(--gold)}
 @media (hover:none){.back-top{width:58px;height:58px}}
 @media (max-width:760px){.back-top{right:16px;bottom:20px}}
+/* ---------- side rails (wide screens, keep layout density) ---------- */
+.siderail{position:fixed;top:96px;bottom:44px;width:238px;z-index:55;display:flex;flex-direction:column;pointer-events:none}
+.siderail>*{pointer-events:auto}
+.railleft{left:calc((100vw - 1120px)/2 - 244px)}
+.railright{right:calc((100vw - 1120px)/2 - 244px)}
+@media (max-width:1720px){.siderail{display:none}}
+.rail-panel{background:linear-gradient(165deg,rgba(28,23,15,.92),rgba(12,10,7,.96));border:1px solid var(--line);border-radius:12px;padding:13px 11px 12px;margin-bottom:12px;box-shadow:0 16px 40px -20px rgba(0,0,0,.9);overflow:hidden}
+.rail-panel h6{font-family:var(--serif);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-deep);margin:2px 2px 8px;display:flex;align-items:center;gap:8px;font-weight:600}
+.rail-panel h6::after{content:"";flex:1;height:1px;background:var(--line)}
+.rail-panel h6 span{color:var(--ink-faint);font-family:var(--sans);letter-spacing:0;text-transform:none;font-size:10.5px}
+.rail-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;cursor:pointer;color:var(--ink-dim);font-size:12.5px;line-height:1.45;padding:7px 8px;border-radius:7px;transition:color .2s var(--ease),background .2s var(--ease)}
+.rail-item:hover{color:var(--gold-soft);background:rgba(201,161,90,.09)}
+.rail-item .rn{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:12px;min-width:20px;flex:none}
+.rail-item .rc{margin-left:auto;font-size:10.5px;color:var(--ink-faint);font-family:var(--serif);flex:none;padding-left:8px}
+.rail-item .tc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rail-sep{height:1px;background:var(--line-soft);margin:9px 3px}
+.rail-tip{font-size:11px;color:var(--ink-faint);line-height:1.75;margin:4px 3px 0;letter-spacing:.02em}
+.railbtn{display:flex;align-items:center;gap:10px;width:100%;background:none;border:1px solid var(--line);border-radius:9px;color:var(--ink-dim);font-size:12.5px;padding:9px 11px;cursor:pointer;transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease);margin-bottom:9px}
+.railbtn:last-child{margin-bottom:0}
+.railbtn:hover{color:var(--gold-soft);border-color:var(--gold-deep);background:rgba(201,161,90,.07)}
+.railbtn .rice{color:var(--gold-deep);font-size:13px;font-family:var(--serif);font-style:normal}
+.chips.shrink{max-height:46px;overflow:hidden;position:relative}
+.chips.shrink::after{content:"";position:absolute;left:0;right:0;bottom:0;height:24px;background:linear-gradient(180deg,transparent,var(--bg2));pointer-events:none}
+@media print{.siderail{display:none!important}}
 </style>
 </head>
 <body>
@@ -422,7 +446,7 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
     </div>
   </section>
 
-  <section class="shell" style="padding-top:60px">
+  <section class="shell" style="padding-top:60px" id="diff">
     <div class="kicker">Differentiation · Phase II</div>
     <h2 class="sec">差异化壁垒</h2>
     <p class="sec-sub">面向专业剧组的深度风格参考。</p>
@@ -446,7 +470,7 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
     </div>
   </section>
 
-  <section class="shell" style="padding-top:60px">
+  <section class="shell" style="padding-top:60px" id="ent">
     <div class="kicker">Modules</div>
     <h2 class="sec">子界面入口</h2>
     <p class="sec-sub">各子界面独立运转、随开随用。</p>
@@ -479,7 +503,7 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
     </div>
   </section>
 
-  <section class="shell" style="padding-top:60px">
+  <section class="shell" style="padding-top:60px" id="how">
     <div class="kicker">Workflow</div>
     <h2 class="sec">怎么用</h2>
     <div class="vol-rule"></div>
@@ -491,7 +515,7 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
     </div>
   </section>
 
-  <section class="shell" style="padding-top:50px">
+  <section class="shell" style="padding-top:50px" id="dist">
     <div class="kicker">Distribution</div>
     <h2 class="sec">分发与协作</h2>
     <div class="vol-rule"></div>
@@ -781,6 +805,7 @@ function renderD(){
   dfilmsEl.innerHTML=html;
   demptyEl.hidden=matched!==0;
   dcountEl.innerHTML='显示 <b>'+matched+'</b> / <b>'+DECOMP.length+'</b> 部';
+  buildRailList&&buildRailList();
 }
 
 function onDCopy(btn){
@@ -924,6 +949,7 @@ function renderDir(){
   dirFilmsEl.innerHTML=html;
   dirEmptyEl.hidden=matched!==0;
   dirCountEl.innerHTML='显示 <b>'+matched+'</b> / <b>'+DIRECTOR.length+'</b> 位';
+  buildRailList&&buildRailList();
 }
 
 function onXCopy(btn){
@@ -1028,6 +1054,7 @@ function render(){
   volEl.innerHTML=html;
   emptyEl.hidden = matched!==0;
   liveEl.innerHTML='显示 <b>'+matched+'</b> / <b>'+LIBRARY.reduce(function(n,c){return n+c.items.length;},0)+'</b> 条';
+  buildRailList&&buildRailList();
 }
 
 function adjustedPrompt(it){
@@ -1077,6 +1104,141 @@ document.getElementById("btnRand").addEventListener("click",randView);
 
 render();
 route();
+
+/* ---------- side rails: left index / right tools ---------- */
+var FOLDK="wb_chips_fold_v1";
+var CHIPSID={"view-library":"chips","view-breakdown":"dtags","view-director":"dirTags"};
+var RANDMAP={"view-library":"btnRand","view-breakdown":"dRand","view-director":"dirRand"};
+var HOME_ANCHORS=[["核心能力模块","sec-core"],["差异化壁垒","diff"],["子界面入口","ent"],["怎么用","how"],["分发协作","dist"]];
+function smoothMove(){ return (window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?"auto":"smooth"; }
+function railHash(){ var h=(location.hash||"").replace("#","")||"view-home"; return VIEWS.indexOf(h)<0?"view-home":h; }
+function railFold(){ try{return localStorage.getItem(FOLDK)==="1";}catch(e){return false;} }
+function applyFold(){
+  ["chips","dtags","dirTags"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.toggle("shrink",railFold());
+  });
+}
+function buildRailList(){
+  var box=document.getElementById("railLBox");
+  if(!box) return;
+  var h=railHash(),html="",el,i=0;
+  if(h==="view-home"){
+    html+='<div class="rail-tip">全站资产<br>· 技法提示词 <b style="color:var(--gold-soft)">'+LIBRARY.reduce(function(n,c){return n+c.items.length;},0)+'</b> 条<br>· 拆解影片 <b style="color:var(--gold-soft)">'+DECOMP.length+'</b> 部<br>· 导演卷宗 <b style="color:var(--gold-soft)">'+DIRECTOR.length+'</b> 位</div>';
+  }else if(h==="view-library"){
+    html+='<div class="rail-tip">当前筛选 '+(liveEl?liveEl.textContent.replace(/<[^>]*>/g,""):"")+'</div>';
+  }else if(h==="view-breakdown"){
+    var fs=dfilmsEl.querySelectorAll(".film");
+    for(i=0;i<fs.length&&i<10;i++){
+      el=fs[i];
+      var nm=(el.querySelector(".film-name")||{textContent:""}).textContent.replace(/\s+/g," ").trim();
+      html+='<button class="rail-item" data-sc="'+el.id+'"><span class="rn">'+(i+1)+'</span><span class="tc">'+esc(nm.length>22?nm.slice(0,22)+"…":nm)+'</span></button>';
+    }
+    if(fs.length>10) html+='<div class="rail-tip" style="padding:6px 8px 0">… 其余 '+(fs.length-10)+' 条见正文</div>';
+  }else if(h==="view-director"){
+    var gs=dirFilmsEl.querySelectorAll(".film");
+    for(i=0;i<gs.length&&i<10;i++){
+      el=gs[i];
+      var gn=(el.querySelector(".film-name")||{textContent:""}).textContent.replace(/\s+/g," ").trim();
+      html+='<button class="rail-item" data-sc="'+el.id+'"><span class="rn">'+(i+1)+'</span><span class="tc">'+esc(gn.length>22?gn.slice(0,22)+"…":gn)+'</span></button>';
+    }
+    if(gs.length>10) html+='<div class="rail-tip" style="padding:6px 8px 0">… 其余 '+(gs.length-10)+' 位见正文</div>';
+  }
+  box.innerHTML=html;
+}
+function buildRailLeft(){
+  var railL=document.getElementById("railL");
+  if(!railL) return;
+  var h=railHash(),L='';
+  if(h==="view-home"){
+    L+='<div class="rail-panel"><h6>本页目录</h6>';
+    HOME_ANCHORS.forEach(function(a){
+      L+='<button class="rail-item" data-sc="#'+a[1]+'"><span class="rn">·</span><span class="tc">'+a[0]+'</span></button>';
+    });
+    L+='</div>';
+  }else if(h==="view-library"){
+    L+='<div class="rail-panel"><h6>卷次目录<span>Volumes</span></h6>';
+    L+='<button class="rail-item" data-act="libAll"><span class="rn">↥</span><span class="tc">全部卷</span><span class="rc">'+LIBRARY.reduce(function(n,c){return n+c.items.length;},0)+'</span></button>';
+    LIBRARY.forEach(function(c,i){
+      L+='<button class="rail-item" data-act="libVol" data-i="'+i+'"><span class="rn">'+ROMAN[i]+'</span><span class="tc">'+esc(c.name)+'</span><span class="rc">'+c.items.length+'</span></button>';
+    });
+    L+='</div>';
+  }else if(h==="view-breakdown"){
+    L+='<div class="rail-panel"><h6>地区筛选</h6>';
+    [["all","全部地区"],["cn","国内"],["gl","全球"]].forEach(function(g){
+      L+='<button class="rail-item" data-act="dseg" data-r="'+g[0]+'"><span class="rn">↥</span><span class="tc">'+g[1]+'</span></button>';
+    });
+    L+='</div>';
+  }else if(h==="view-director"){
+    L+='<div class="rail-panel"><h6>大洲筛选</h6>';
+    [["all","全部导演"],["am","美洲"],["eu","欧洲"],["as","亚洲"]].forEach(function(g){
+      L+='<button class="rail-item" data-act="dirseg" data-r="'+g[0]+'"><span class="rn">↥</span><span class="tc">'+g[1]+'</span></button>';
+    });
+    L+='</div>';
+  }
+  L+='<div class="rail-panel" id="railLBox"><h6>结果索引<span>当前位置</span></h6></div>';
+  railL.innerHTML=L;
+  buildRailList();
+}
+function buildRailRight(){
+  var railR=document.getElementById("railR");
+  if(!railR) return;
+  var h=railHash(),R='';
+  R+='<div class="rail-panel"><h6>快捷工具</h6>';
+  if(RANDMAP[h]) R+='<button class="railbtn" id="railRand"><span class="rice">✳</span>随机灵感</button>';
+  if(CHIPSID[h]) R+='<button class="railbtn" id="railFold"><span class="rice">⇅</span>'+(railFold()?"展开全部标签":"收拢标签筛选")+'</button>';
+  R+='<button class="railbtn" id="railTop"><span class="rice">↑</span>回到顶部</button>';
+  R+='</div>';
+  R+='<div class="rail-panel"><h6>说明</h6><p class="rail-tip">大屏吸附侧栏：左目录快速定位，右工具快捷操作。标签过多可先收拢，减少滚动距离。</p></div>';
+  railR.innerHTML=R;
+  applyFold();
+}
+function refreshRail(){ buildRailLeft(); buildRailRight(); }
+function bootRails(){
+  var railL=document.getElementById("railL"),railR=document.getElementById("railR");
+  if(!railL||!railR) return;
+  railL.addEventListener("click",function(e){
+    var b=e.target.closest(".rail-item"); if(!b) return;
+    var act=b.getAttribute("data-act");
+    if(act==="libVol"){
+      var i=+b.getAttribute("data-i");
+      if(state.cat!=="c"+i){ state.cat="c"+i; qEl.value=state.q=""; render(); }
+      document.getElementById("vol-"+i)&&document.getElementById("vol-"+i).scrollIntoView({behavior:smoothMove(),block:"start"});
+    }else if(act==="libAll"){
+      if(state.cat!=="all"){ state.cat="all"; qEl.value=state.q=""; render(); }
+      window.scrollTo({top:0,behavior:smoothMove()});
+    }else if(act==="dseg"||act==="dirseg"){
+      var seg=document.getElementById(act==="dseg"?"dseg":"dirSeg");
+      var bs=seg.querySelectorAll("button");
+      for(var k=0;k<bs.length;k++){ if(bs[k].getAttribute("data-region")===b.getAttribute("data-r")){ bs[k].click(); break; } }
+      window.scrollTo({top:0,behavior:smoothMove()});
+    }else{
+      var sc=b.getAttribute("data-sc"); if(!sc) return;
+      if(sc.charAt(0)==="#"){ var s=document.querySelector(sc); if(s) s.scrollIntoView({behavior:smoothMove(),block:"center"}); }
+      else{ var el2=document.getElementById(sc); if(el2) el2.scrollIntoView({behavior:smoothMove(),block:"start"}); }
+    }
+  });
+  railR.addEventListener("click",function(e){
+    var b=e.target.closest(".railbtn"); if(!b) return;
+    var id=b.id,h=railHash();
+    if(id==="railRand"){
+      var t=RANDMAP[h];
+      if(t){ var el=document.getElementById(t); if(el) el.click(); }
+    }else if(id==="railFold"){
+      var on=!railFold();
+      try{ localStorage.setItem(FOLDK,on?"1":"0"); }catch(err){}
+      applyFold();
+      b.innerHTML='<span class="rice">⇅</span>'+(on?"展开全部标签":"收拢标签筛选");
+      toast(on?"已收拢标签筛选条，点击可展开":"已展开全部标签");
+    }else if(id==="railTop"){
+      window.scrollTo({top:0,behavior:smoothMove()});
+    }
+  });
+  window.addEventListener("hashchange",refreshRail);
+  refreshRail();
+}
+if(document.readyState==="loading"){ document.addEventListener("DOMContentLoaded",bootRails); }
+else{ bootRails(); }
 })();
 /* ---------- back-to-top: draggable position + jump-to-top ---------- */
 (function(){
@@ -1148,6 +1310,8 @@ route();
   onScroll();
 })();
 </script>
+<aside class="siderail railleft" id="railL" aria-label="页面目录"></aside>
+<aside class="siderail railright" id="railR" aria-label="快捷工具"></aside>
 <button id="backTop" class="back-top" type="button" aria-label="回到顶部" title="拖拽可调整位置，点击回到顶部">
   <span class="bt-arrow">↑</span>
   <span class="bt-txt">TOP</span>
