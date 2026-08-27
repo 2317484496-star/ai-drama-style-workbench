@@ -334,7 +334,17 @@ footer li::before{content:"—";position:absolute;left:0;color:var(--gold-deep)}
   .item{break-inside:avoid}
   .prompt-block pre{color:#222}
   .modal{box-shadow:none}
+  .back-top{display:none!important}
 }
+/* ---------- back-to-top floating (draggable) ---------- */
+.back-top{position:fixed;right:26px;bottom:30px;z-index:98;width:54px;height:54px;border-radius:14px;border:1px solid var(--gold-soft);background:linear-gradient(160deg,rgba(30,25,16,.94),rgba(13,11,8,.97));color:var(--gold-soft);cursor:grab;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 16px 38px -14px rgba(0,0,0,.95);opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .3s var(--ease),transform .3s var(--ease),box-shadow .3s var(--ease),color .2s var(--ease),border-color .2s var(--ease);user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+.back-top.show{opacity:1;visibility:visible;transform:translateY(0)}
+.back-top:hover{box-shadow:0 20px 46px -14px rgba(0,0,0,.95)}
+.back-top .bt-arrow{font-size:21px;line-height:1;font-weight:700}
+.back-top .bt-txt{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-deep)}
+.back-top.dragging{cursor:grabbing;border-color:var(--gold);color:var(--gold)}
+@media (hover:none){.back-top{width:58px;height:58px}}
+@media (max-width:760px){.back-top{right:16px;bottom:20px}}
 </style>
 </head>
 <body>
@@ -1069,6 +1079,79 @@ document.getElementById("btnRand").addEventListener("click",randView);
 render();
 route();
 })();
+/* ---------- back-to-top: draggable position + jump-to-top ---------- */
+(function(){
+  var btn=document.getElementById("backTop");
+  if(!btn) return;
+  var HK="wb_backtop_pos_v1";
+  var sx=0,sy=0,left0=0,top0=0,moved=false,started=false;
+  function clamp(x,y){
+    var m=12,w=btn.offsetWidth||54,h=btn.offsetHeight||54;
+    var vw=window.innerWidth,vh=window.innerHeight;
+    x=Math.max(m,Math.min(x,vw-w-m));
+    y=Math.max(m,Math.min(y,vh-h-m));
+    return [x,y];
+  }
+  function savePos(){
+    var cs=getComputedStyle(btn);
+    var l=parseFloat(cs.left),t=parseFloat(cs.top);
+    if(!isNaN(l)&&!isNaN(t)){ try{localStorage.setItem(HK,JSON.stringify({x:l,y:t}));}catch(e){} }
+  }
+  try{
+    var s=JSON.parse(localStorage.getItem(HK)||"null");
+    if(s&&isFinite(s.x)&&isFinite(s.y)){
+      var p=clamp(s.x,s.y);
+      btn.style.left=p[0]+"px"; btn.style.top=p[1]+"px";
+      btn.style.right="auto"; btn.style.bottom="auto";
+    }
+  }catch(e){}
+  btn.addEventListener("pointerdown",function(ev){
+    started=true;moved=false;
+    sx=ev.clientX;sy=ev.clientY;
+    var cs=getComputedStyle(btn);
+    left0=(cs.left&&cs.left!=="auto")?parseFloat(cs.left):(window.innerWidth-btn.offsetWidth-(parseFloat(cs.right)||26));
+    top0=(cs.top&&cs.top!=="auto")?parseFloat(cs.top):(window.innerHeight-btn.offsetHeight-(parseFloat(cs.bottom)||30));
+    btn.classList.add("dragging");
+    try{btn.setPointerCapture(ev.pointerId);}catch(e){}
+  });
+  btn.addEventListener("pointermove",function(ev){
+    if(!started) return;
+    var dx=ev.clientX-sx,dy=ev.clientY-sy;
+    if(!moved&&Math.abs(dx)+Math.abs(dy)>5) moved=true;
+    if(moved){
+      var p=clamp(left0+dx,top0+dy);
+      btn.style.left=p[0]+"px"; btn.style.top=p[1]+"px";
+      btn.style.right="auto"; btn.style.bottom="auto";
+    }
+  });
+  function endDrag(ev){
+    if(!started) return;
+    started=false;
+    btn.classList.remove("dragging");
+    try{btn.releasePointerCapture(ev.pointerId);}catch(e){}
+    if(moved){ savePos(); }
+  }
+  btn.addEventListener("pointerup",endDrag);
+  btn.addEventListener("pointercancel",function(){ started=false;btn.classList.remove("dragging"); });
+  btn.addEventListener("click",function(ev){
+    if(moved){ ev.preventDefault(); moved=false; return; }
+    var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
+    document.documentElement.scrollTop=0; document.body.scrollTop=0;
+    var sc=document.querySelector("[data-scroll]");
+    if(sc) sc.scrollTop=0;
+  });
+  function onScroll(){
+    var y=window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0;
+    btn.classList.toggle("show",y>480);
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  onScroll();
+})();
 </script>
+<button id="backTop" class="back-top" type="button" aria-label="回到顶部" title="拖拽可调整位置，点击回到顶部">
+  <span class="bt-arrow">↑</span>
+  <span class="bt-txt">TOP</span>
+</button>
 </body>
 </html>
